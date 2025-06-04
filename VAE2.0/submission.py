@@ -82,29 +82,10 @@ class VAE(nn.Module):
 
 # TODO: 2.3 Calculate vae loss using input and output
 def vae_loss(recon_x, x, mu, log_var, var=0.5):
-    """ 
-    Compute the loss of VAE
-
-    Args:
-        - recon_x: output of the Decoder, shape [batch_size, 1, 28, 28]
-        - x: original input image, shape [batch_size, 1, 28, 28]
-        - mu: output of encoder, represents mu_phi, shape [batch_size, latent_dim]
-        - log_var: output of encoder, represents log (sigma_phi)^2, shape [batch_size, latent_dim]
-        - var: variance of the decoder output, here we can set it to be a hyperparameter
-    """
-    # TODO: 2.3 Finish code!
-    # Reconstruction loss (MSE or other recon loss)
-    # KL divergence loss
-    # Hint: Remember to normalize of batches, we need to cal the loss among all batches and return the mean!
-
     batch_size = x.size(0)
-    # 重构损失（MSE）并应用系数1/(2*var)
-    mse_loss = torch.nn.functional.mse_loss(recon_x, x, reduction='sum')
-    recon_loss = mse_loss / (2 * var)
-    # KL散度损失（根据公式计算）
-    kl_loss = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
-    # 总损失按batch求均值
-    loss = (recon_loss + kl_loss) / batch_size
+    recon_loss = F.mse_loss(recon_x.view(batch_size, -1), x.view(batch_size, -1), reduction='none').sum(dim=1).mean()
+    kl_loss = -0.5 * torch.sum((1 + log_var - mu.pow(2) - log_var.exp()), dim=1).mean()
+    loss = recon_loss + kl_loss
     return loss
 
 # TODO: 3 Design the model to finish generation task using label
