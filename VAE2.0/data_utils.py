@@ -29,7 +29,6 @@ class MNISTDataset(Dataset):
         
         image = self.transform(sample['image'])
         label = torch.tensor(sample['label'], dtype=torch.long)
-        
         return image, label
 
     def shuffle(self):
